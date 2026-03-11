@@ -1,0 +1,378 @@
+\documentclass[10pt]{beamer}
+
+% --- Preamble and Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, chains, fit, calc}
+\usepackage{epstopdf}
+
+\usetheme{CambridgeUS}
+\usecolortheme{dolphin}
+
+% --- Custom Colors ---
+\definecolor{myNewColorA}{RGB}{90, 80, 140}
+\setbeamercolor*{palette primary}{bg=myNewColorA}
+\setbeamercolor*{titlelike}{fg=myNewColorA}
+\setbeamercolor*{title}{bg=myNewColorA, fg=white}
+\setbeamercolor*{item}{fg=myNewColorA}
+\setbeamercolor*{caption name}{fg=myNewColorA}
+\usefonttheme{professionalfonts}
+
+% --- Font Sizes ---
+\setbeamerfont{title}{size=\large}
+\setbeamerfont{subtitle}{size=\small}
+\setbeamerfont{author}{size=\small}
+\setbeamerfont{date}{size=\small}
+\setbeamerfont{institute}{size=\footnotesize}
+
+% --- Title Info ---
+\title[CFO Estimation under Impulsive Noise]{CFO Estimation for OFDM-Based Wireless Communication Systems Under Impulsive Noise}
+\author[Shivansh Rai et al.]{Shivansh Rai\inst{1}, Sandesh Jain\inst{2}, Mahesh Shamrao Chaudhari\inst{3}, \and Poornima Singh Thakur\inst{1}}
+\institute[]{
+    \inst{1} \textit{Dept. of Information Technology, ABV-IIITM Gwalior} \\
+    \inst{2} \textit{Dept. of Electrical and Electronics Engineering, ABV-IIITM Gwalior} \\
+    \inst{3} \textit{Dept. of Electronics and Communication Engineering, TIET Patiala}
+}
+\date{March 13 , 2026}
+
+% =====================================================================
+\begin{document}
+% =====================================================================
+
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Outline}
+    \tableofcontents
+\end{frame}
+
+% =====================================================================
+\section{Introduction}
+% =====================================================================
+
+\begin{frame}
+\frametitle{Motivation and Problem Statement}
+
+\begin{block}{The Impact of CFO}
+Modern wireless standards — \textbf{4G LTE, 5G NR, Wi-Fi (802.11ax)} — all rely on
+orthogonal frequency division multiplexing (OFDM) for its high spectral efficiency
+and resilience to multipath fading.
+However, OFDM is highly sensitive to synchronization errors:
+carrier frequency offset (CFO), caused by oscillator mismatch or Doppler shifts,
+destroys subcarrier orthogonality and leads to severe inter-carrier interference (ICI),
+significantly degrading bit error rate (BER) performance.
+\end{block}
+
+\vspace{0.3cm}
+
+\begin{alertblock}{Limitations of Existing DL Estimators}
+Most deep learning (DL) approaches for CFO estimation rely on the conventional
+minimum mean squared error (MMSE) criterion.
+\begin{itemize}
+    \item MMSE minimizes average squared error, relying on second-order statistics.
+    \item Under non-Gaussian or impulsive noise, squared-error terms \textbf{amplify} high-amplitude outliers.
+    \item This causes \textbf{gradient explosion} during training, hindering convergence.
+\end{itemize}
+\end{alertblock}
+
+\end{frame}
+
+% =====================================================================
+\section{System and Noise Model}
+% =====================================================================
+
+\begin{frame}
+\frametitle{System Model Overview}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth, height=0.72\textheight, keepaspectratio]{system_model.eps}
+    \caption{Signal propagation: transmitter, channel, CFO, impulsive noise, and CAD-Huber estimator.}
+\end{figure}
+\end{frame}
+
+% \begin{frame}
+% \frametitle{OFDM Signal Model}
+
+% \begin{block}{Transmitted Signal}
+% Time-domain signal $x[n]$ after IFFT and CP insertion:
+% \[
+% x[n]=\frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}X[k]\,e^{j\frac{2\pi kn}{N}}, \qquad -N_{cp}\le n<N
+% \]
+% \end{block}
+
+% \vspace{0.3cm}
+
+% \begin{block}{Received Signal}
+% After a frequency-selective channel with $L$ taps and normalized CFO $\epsilon$:
+% \[
+% r[n]=e^{j\frac{2\pi\epsilon n}{N}}\sum_{l=0}^{L-1}h[l]\,x[n-l]+w[n]
+% \]
+% \end{block}
+
+% \end{frame}
+
+\begin{frame}
+\frametitle{Impulsive Noise Model}
+
+\begin{alertblock}{Symmetric $\alpha$-Stable ($S\alpha S$) Distribution}
+We model $w[n]$ using the $S\alpha S$ distribution to capture impulsive industrial/urban channels.
+Its characteristic function is:
+\[
+\varphi(t)=\exp\!\bigl(-\gamma\,|t|^{\alpha}\bigr)
+\]
+\end{alertblock}
+
+\vspace{0.3cm}
+
+\begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{Parameters}
+    \begin{itemize}
+        \item $\alpha \in (0,2]$: \textit{characteristic exponent} — controls outlier severity.
+        \item $\gamma > 0$: \textit{dispersion parameter}.
+    \end{itemize}
+    \end{block}
+
+    \column{0.5\textwidth}
+    \begin{block}{Key Implication}
+    For $\alpha < 2$, variance is \textbf{infinite}.
+    Conventional $L_2$-norm estimators diverge — necessitating a robust alternative.
+    \end{block}
+\end{columns}
+
+\end{frame}
+
+% --- Architecture Part 1: Diagram ---
+\begin{frame}
+\frametitle{CAD-HuberNet Architecture}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth, height=0.72\textheight, keepaspectratio]{architecture.eps}
+    \caption{Detailed view of the dual-stream CNN-Attention-DNN (CAD-Huber) model.}
+\end{figure}
+\end{frame}
+% =====================================================================
+\section{Proposed Architecture: CAD-HuberNet}
+% =====================================================================
+
+\begin{frame}
+\frametitle{Multi-Modal Input Feature Representation}
+
+\begin{exampleblock}{Dual-Stream Inputs: $\mathbf{X} = [X^{(u)},\, X^{(l)}]$}
+
+\vspace{0.15cm}
+\begin{columns}[T]
+    \column{0.5\textwidth}
+    \textbf{Upper Stream} (Squared Spectrum)\\[4pt]
+    Amplifies cyclic frequencies linked to carrier offset:
+    \[
+    X^{(u)}=\bigl|\mathcal{F}\!\left(|r[n]|^{2}\right)\bigr|\in\mathbb{R}^{S\times1}
+    \]
+
+    \column{0.5\textwidth}
+    \textbf{Lower Stream} (Magnitude + Phase)\\[4pt]
+    Preserves phase information to resolve frequency ambiguities:
+    \[
+    X^{(l)} = \bigl[|\mathcal{F}(r[n])|,\; \angle\mathcal{F}(r[n])\bigr] \in\mathbb{R}^{S\times2}
+    \]
+\end{columns}
+\end{exampleblock}
+
+\vspace{0.2cm}
+Raw time-domain signals lack direct spectral features; the dual-stream design ensures both
+power-spectral and phase information are fed to the network simultaneously.
+
+\end{frame}
+
+
+
+% --- Architecture Part 2: Component Details ---
+\begin{frame}
+\frametitle{CAD-HuberNet: Key Components}
+
+\begin{block}{1. Feature Extraction — Triple Residual Stacks (TRS)}
+Prevents vanishing gradients via skip connections. For the $l$-th layer:
+\[
+Z_{l}=\sigma(W_{l}*Z_{l-1}+b_{l})+Z_{l-1}
+\]
+\end{block}
+
+\begin{block}{2. Attention Mechanism}
+Prioritizes spectral features from clean subcarriers; suppresses impulsive-spike-corrupted ones:
+\[
+e_{i}=v^{T}\tanh(W_{a}h_{i}+b_{a}), \qquad
+\alpha_{i}=\frac{\exp(e_{i})}{\displaystyle\sum_{k}\exp(e_{k})}
+\]
+\end{block}
+
+\begin{block}{3. DNN Regression Head}
+Attention-weighted context vectors from both streams are concatenated and passed through
+fully-connected layers to produce the scalar CFO estimate $\hat{\epsilon}$.
+\end{block}
+
+\end{frame}
+
+% =====================================================================
+\section{Robust Optimization}
+% =====================================================================
+
+\begin{frame}
+\frametitle{Robust Optimization via Huber Loss}
+
+\begin{block}{The Huber Penalty Function}
+To mitigate exploding gradients from heavy-tailed $S\alpha S$ noise, the network is trained
+with the Huber loss:
+\[
+\rho_{\delta}(e)=
+\begin{cases}
+\dfrac{1}{2}e^{2} & |e|\le\delta,\\[8pt]
+\delta|e|-\dfrac{1}{2}\delta^{2} & |e|>\delta.
+\end{cases}
+\]
+\end{block}
+
+\vspace{0.2cm}
+
+\begin{alertblock}{Gradient Saturation — Preventing Explosion}
+The gradient $\psi(e)$ clips large residuals to a fixed magnitude $\delta$:
+\[
+\psi(e) =
+\begin{cases}
+e & |e|\le\delta,\\[4pt]
+\delta\cdot\operatorname{sgn}(e) & |e|>\delta.
+\end{cases}
+\]
+Massive outliers are therefore \textbf{bounded} during backpropagation, ensuring stable convergence.
+\end{alertblock}
+
+\end{frame}
+
+% =====================================================================
+\section{Simulation Results}
+% =====================================================================
+
+\begin{frame}
+\frametitle{Simulation Setup}
+
+\begin{columns}[T]
+    \column{0.5\textwidth}
+    \begin{block}{OFDM System Parameters}
+    \begin{itemize}
+        \item Subcarriers: $N = 128$
+        \item Cyclic prefix: $N_{cp} = 16$
+        \item Modulation: 64-QAM
+        \item Channel taps: $L = 3$ (freq.-selective)
+        \item Normalized CFO: $\epsilon \sim \mathcal{U}(-0.5,\,0.5)$
+    \end{itemize}
+    \end{block}
+
+    \column{0.5\textwidth}
+    \begin{block}{Training Configuration}
+    \begin{itemize}
+        \item Noise: $S\alpha S$, $\alpha=1.4$, $\gamma=0.1$
+        \item Dataset: 20{,}000 OFDM symbols
+        \item Split: 70\% train / 30\% validation
+        \item Optimizer: Adam, LR $= 10^{-3}$
+        \item Batch size: 1000; max epochs: 2000
+    \end{itemize}
+    \end{block}
+\end{columns}
+
+\vspace{0.3cm}
+\begin{block}{Baseline}
+All results compare \textbf{CAD-HuberNet} against the existing \textbf{CAD-MMSE} model
+\cite{chaudhari2023_cad}. Performance metric: MSE (dB scale, $10\log_{10}(\text{MSE})$).
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Results: Convergence and SNR Performance}
+
+\begin{columns}[T]
+
+\column{0.5\textwidth}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth, height=0.48\textheight, keepaspectratio]{mse_vs_epoch.eps}
+\caption{Training Convergence (MSE vs. Epoch)}
+\end{figure}
+\footnotesize
+MMSE loss oscillates due to impulsive spikes amplifying the squared-error gradient.
+Huber loss yields \textbf{stable, monotone} descent.
+
+\column{0.5\textwidth}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth, height=0.48\textheight, keepaspectratio]{steady_mse_vs_snr.eps}
+\caption{Steady-State MSE vs. SNR}
+\end{figure}
+\footnotesize
+At 15 dB SNR, CAD-HuberNet achieves \textbf{$-19.21$ dB MSE} vs.\ $-9.42$ dB for CAD-MMSE
+— a gain of nearly \textbf{10 dB}.
+
+\end{columns}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Results: Robustness to Impulsiveness ($\alpha$)}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.65\textwidth, height=0.5\textheight, keepaspectratio]{mse_vs_alpha.eps}
+\caption{Steady-state MSE vs.\ $\alpha$ at SNR = 20 dB}
+\end{figure}
+
+\vspace{0.1cm}
+\begin{itemize}
+    \item In the \textbf{highly impulsive} regime ($\alpha=1.3$), CAD-HuberNet achieves
+          MSE $\approx -1.38$ dB vs.\ CAD-MMSE at MSE $\approx 0$ dB.
+    \item As $\alpha \to 2.0$ (Gaussian limit), both models converge to comparable performance,
+          confirming Huber loss incurs \textbf{no penalty} in benign conditions.
+\end{itemize}
+
+\end{frame}
+
+% =====================================================================
+\section{Conclusion}
+% =====================================================================
+
+\begin{frame}
+\frametitle{Conclusion}
+
+\begin{block}{Summary of Contributions}
+\begin{itemize}
+    \item Proposed a \textbf{robust blind CFO estimation} framework for heavy-tailed
+          non-Gaussian (impulsive) noise environments.
+    \item Designed a \textbf{dual-stream CNN-Attention-DNN (CAD)} architecture that
+          jointly exploits power-spectral and phase features.
+    \item Replaced MMSE with \textbf{Huber loss}, actively bounding outlier gradients
+          during backpropagation.
+    \item Demonstrated \textbf{superior steady-state accuracy and convergence stability}
+          over standard DL baselines, especially for $\alpha < 2$.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+% --- THANK YOU SLIDE ---
+\begin{frame}[plain]
+    \centering
+    \vfill
+    {\Huge \bfseries Thank You}
+    \vspace{1.2em}
+    \large Questions?
+    \vfill
+    \normalsize
+    \textbf{Shivansh Rai}\\[4pt]
+    \footnotesize Department of Information Technology\\
+    ABV-IIITM Gwalior
+    \vfill
+\end{frame}
+\end{document}

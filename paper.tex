@@ -1,0 +1,507 @@
+\documentclass[10pt, journal]{IEEEtran}
+\IEEEoverridecommandlockouts
+%\usepackage{geometry}
+%\geometry{
+%	a4paper,
+%	total={210mm,297mm},
+%	left=26mm,
+%	top=18mm,
+%	right=26mm,
+%	bottom=4.3cm
+%}
+\usepackage{blindtext}
+\usepackage{etoolbox}
+\makeatletter
+\def\do#1{\patchcmd{#1}{\thepage}{\null}{}{\GenericWarning{}{Could not patch \string#1}}}
+\docsvlist{\@oddhead,\@evenhead,\ps@headings,\ps@IEEEtitlepagestyle,\ps@IEEEpeerreviewcoverpagestyle}
+\makeatother
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage[tight,footnotesize]{subfigure}
+\usepackage{caption}
+\usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage{cite}
+\usepackage{textcomp}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{arydshln}
+\usepackage{multicol}
+\usepackage{balance}
+\usepackage{epstopdf}
+\usepackage{balance}
+\usepackage{amssymb}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\usepackage{lipsum} 
+\usepackage{multicol}  
+\usepackage{ mathrsfs}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+%\usepackage[font=sc]{caption}
+\newcounter{MYtempeqncnt}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+\usepackage{titlesec}
+
+% --- TIKZ SETUP ---
+\usepackage{tikz}
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata,shadows,decorations.pathmorphing}
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+% --- COMMANDS & STYLES ---
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcounter{MYtempeqncnt}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+% Tikz styles for block diagram
+\tikzstyle{base_block} = [rectangle, draw=black!60, thick, rounded corners=3pt, align=center, drop shadow={opacity=0.3, shadow xshift=2pt, shadow yshift=-2pt}]
+\tikzstyle{sys_block} = [base_block, top color=cyan!5, bottom color=cyan!15, text width=1.6cm, minimum height=1.0cm, font=\footnotesize\bfseries]
+\tikzstyle{proc_block} = [base_block, top color=orange!5, bottom color=orange!15, text width=2.0cm, minimum height=1.4cm, font=\small\bfseries]
+\tikzstyle{att_block} = [base_block, top color=violet!5, bottom color=violet!15, text width=2.0cm, minimum height=1.4cm, font=\small\bfseries]
+\tikzstyle{end_block} = [base_block, top color=gray!5, bottom color=gray!15, text width=1.1cm, minimum height=1.2cm, font=\small\bfseries]
+\tikzstyle{adder} = [circle, draw=black!70, fill=white, inner sep=0pt, minimum size=6mm, drop shadow={opacity=0.2}]
+\tikzstyle{line} = [draw, -latex', thick, black]
+\tikzstyle{dim_label} = [midway, above, font=\scriptsize\bfseries, text=black, yshift=2pt]
+\tikzstyle{var_label} = [midway, above=0.35cm, font=\small\bfseries]
+\tikzstyle{input_label} = [align=right, font=\bfseries]
+
+\begin{document}
+
+\title{CFO Estimation for OFDM-Based Wireless Communication Systems Under Impulsive Noise
+
+\thanks{979-8-3315-4970-1/26/\$31.00 ©2026 IEEE}
+}
+
+\author{
+    \IEEEauthorblockN{Shivansh Rai$^1$, Sandesh Jain$^2$, Mahesh Shamrao Chaudhari$^3$, and Poornima Singh Thakur$^1$} \\
+    
+    \IEEEauthorblockA{$^1$\small Department of Information Technology, ABV-Indian Institute of Information Technology and Management, Gwalior-474015, India (e-mail: \{imt\_2021092, poornima\}@iiitm.ac.in ).} \\
+
+     \IEEEauthorblockA{$^2$\small Department of Electrical and Electronics Engineering and Center for Autonomous Systems, ABV-Indian Institute of Information Technology and Management, Gwalior-474015, India (email: sandesh@iiitm.ac.in)}. \\
+
+    \IEEEauthorblockA{$^3$\small Department of Electronics and Communication Engineering, Thapar Institute of Engineering and Technology, Patiala 147004, India (e-mail: mahesh.chaudhari@thapar.edu).}
+} 
+
+
+
+\maketitle
+
+\begin{abstract}
+Carrier frequency offset (CFO) significantly degrades the performance of orthogonal frequency division multiplexing (OFDM) systems by destroying subcarrier orthogonality, leading to severe inter-carrier interference (ICI). While conventional estimation techniques perform well in idealized additive white Gaussian noise (AWGN) channels, practical environments such as industrial internet of things (IoT) and urban networks are often impaired by non-Gaussian/impulsive noise. Existing deep learning (DL) approaches rely on conventional minimum mean square error criterion (MMSE) and hence deliver suboptimal convergence performance for CFO estimation under heavy-tailed non-Gaussian noise. To address this limitation, we propose a novel blind CFO estimation framework using hybrid convolutional neural network (CNN)-attention-deep neural network (DNN) (CAD) architecture, where each layer is trained using Huber loss function. The proposed CAD-Huber architecture provides robustness against impulsive noise due to the consideration of higher order error statistics. Simulation results indicate that the proposed CAD-HuberNet algorithm outperforms the existing MMSE-based DL approaches under highly impulsive regimes, offering a robust solution for next-generation wireless systems.
+\end{abstract}
+
+\begin{IEEEkeywords}
+    Carrier frequency Offset, Orthogonal frequency division multiplexing, impulsive noise, CNN, DNN, and Huber Loss.
+\end{IEEEkeywords}
+
+
+\section{Introduction}
+\IEEEPARstart{O}{rthogonal} frequency division multiplexing (OFDM) have emerged as the cornerstone technology for 5G and beyond wireless communication systems due to its high spectral efficiency and resilience against frequency-selective fading channels. However, the performance of OFDM systems is inherently sensitive to synchronization errors, particularly those caused by carrier frequency offset (CFO) \cite{vandebeek1997ml}. CFO primarily arises due to mismatches between transmitter and receiver local oscillators, as well as Doppler shifts induced by user mobility. CFO destroys the orthogonality among subcarriers, leading to inter-carrier interference (ICI) and common phase rotations that significantly degrade the bit error rate (BER) performance. Therefore, accurate CFO estimation and compensation are essential to restore subcarrier orthogonality and ensure proper synchronization. 
+
+% Furthermore, practical wireless communication systems such as industrial internet-of-things (IoT) and urban networks are often impaired by non-Gaussian impulsive noise (IN) \cite{blackard1993measurements}, which further exacerbates the challenge of accurate synchronization.
+
+To mitigate these effects, a plethora of CFO estimation algorithms have been proposed in the literature, generally categorized into pilot-assisted and blind approaches. Pilot-assisted methods typically achieve high estimation accuracy by embedding known training sequences into the transmission \cite{ninkovic2021deep}. However, this comes at the cost of spectral overhead, reducing the effective throughput of the system. Conversely, blind estimation techniques eliminate the need for training overhead by exploiting the statistical properties of the signal, such as the redundancy of the cyclic prefix (CP) or the cyclostationarity of the received signal \cite{vandebeek1997ml, roman2006blind}. The cost function in \cite{roman2006blind} is based on the minimization of non-diagonal elements of the covariance matrix; however, it requires a large number of OFDM symbols. In \cite{cfo_oh_2011}, the covariance matrix is calculated by circular shifts of the received signal which requires a fewer number of OFDM symbols. The estimation algorithm is based on the forced minimization of out-of-band elements of the covariance matrix to zero, but its performance gets affected under channel having a large delay spread. While blind methods enhance spectral efficiency, statistical approaches often suffer from slow convergence rates, requiring a large number of OFDM symbols to achieve acceptable accuracy. Moreover, conventional statistical estimators rely on apriori knowledge of signal parameters such as the cyclic prefix (CP) length, channel statistics, etc., which limits their robustness and makes them less suitable for dynamic and time-varying environments.
+
+In recent years, deep learning (DL) has emerged as a powerful alternative to classical estimation theory \cite{oshea2017introduction}. Various DL-based approaches, namely fully connected deep neural networks (DNNs) and convolutional neural network (CNN)-based residual networks (ResNets) architectures, have been explored in the literature for CFO estimation. In \cite{chen_cfo_dl_2024}, author demonstrated the utilization of deep learning for CFO estimation by employing a residual network (ResNet) to learn and extract signal features from the raw in-phase (I) and quadrature (Q) components of the signals. It exhibits superior performance in terms of estimation accuracy across various SNRs, different oversampling ratios, different signal lengths, and fading channels.
+
+To further improve the estimation performance, advanced hybrid models such as the CNN–Attention–DNN (CAD) architecture have been proposed \cite{chaudhari2023_cad}. The CAD framework has been found to outperform existing state-of-the-art DL-based methods by incorporating attention mechanisms \cite{bahdanau2014neural}, which enable the model to selectively focus on the most informative spectral features while suppressing redundant information. 
+
+However, the aforementioned DL-based approaches are typically trained using the conventional minimum mean squared error (MMSE) criterion, which leads to performance degradation in the presence of impulsive noise. This is because the MMSE objective minimizes the average squared error between the true and estimated CFO, relying solely on second-order error statistics, and is therefore highly sensitive to outliers and non-Gaussian noise components. Under such conditions, the squared-error term amplifies high-amplitude outliers, which can cause gradient explosion during training and hinder the neural network from converging to an optimal solution. 
+
+It has been found in the literature that performance of OFDM-based wireless communication systems \cite{feng2021message, jain2020ber} is severely degraded by impulsive noise, which makes CFO estimation challenging. Furthermore, various recent 5G and beyond technologies such as millimeter wave communications \cite{boro2025lhcaf}, orthogonal time–frequency space \cite{kumar2023channel}, intelligent reflecting surface (IRS), etc., are found to be highly susceptible to impulsive/non-Gaussian noise. Consequently, robust CFO estimation techniques that can operate reliably under such noise environments are of significant practical importance.
+
+To address these limitations, this paper proposes a robust blind CFO estimation framework tailored for impulsive noise environments. Various robust adaptive filtering and DL algorithms have been proposed in the literature to compensate non-Gaussian distortions using several learning paradigms such as Huber criterion \cite{huber1964robust}, maximum correntropy criterion \cite{7426837, ranjan2024quaternion}, minimum symbol error rate \cite{6466344, jain2020kernel, mitra2020least}, maximum Versoria criterion \cite{10349689, jain2023sparsity, jain2025generalized}, etc. 
+
+Motivated by these robust learning criteria, we introduce a modified CAD architecture trained using the Huber loss function \cite{huber1964robust}, referred to as CAD-HuberNet. Unlike the quadratic MMSE loss, the Huber loss transitions from a quadratic to a linear penalty for large residuals, thereby effectively limiting the influence of impulsive outliers while preserving estimation accuracy for small errors.
+
+% ==================================================================
+% FIGURE 1: System Model with Rectangular Outline
+% ==================================================================
+\begin{figure*}[!ht]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[
+    font=\small\sffamily,
+    >=stealth,
+    node distance=0.9cm and 0.9cm,
+    % --- Styles ---
+    block_tx/.style={
+        rectangle, draw=black, fill=magenta!10,
+        text width=1.4cm, minimum height=1.0cm, align=center, rounded corners=2pt,
+        line width=0.8pt
+    },
+    adder/.style={
+        circle, draw=black, fill=white, inner sep=0pt, minimum size=6mm, line width=0.8pt
+    },
+    line/.style={draw, ->, shorten >=1pt, very thick},
+    pics/antenna/.style={
+        code={
+            \draw[fill=white, line width=0.8pt] (0,0) -- (-0.2,0.6) -- (0.2,0.6) -- cycle;
+            \draw[line width=0.8pt] (0,0) -- (0,-0.4);
+            \foreach \r in {0.2, 0.4, 0.6} \draw[black, line width=0.6pt] (0,0.6) arc (90:150:\r);
+            \foreach \r in {0.2, 0.4, 0.6} \draw[black, line width=0.6pt] (0,0.6) arc (90:30:\r);
+        }
+    },
+    abstract_block/.style={
+        rectangle, draw=black, fill=orange!20,
+        text width=2.5cm, minimum height=1.5cm, align=center, rounded corners=4pt,
+        line width=1.2pt, drop shadow
+    }
+]
+    % --- Layer Setup ---
+    \pgfdeclarelayer{background}
+    \pgfsetlayers{background,main}
+
+    % Chain
+    \node[block_tx] (bits) {Message\\Bits $m$};
+    \node[block_tx, right=0.6cm of bits] (mod) {Modulation\\(QAM)};
+    \node[block_tx, right=0.6cm of mod] (ifft) {IFFT\\+ CP};
+    
+    % Upconversion
+    \node[adder, right=0.6cm of ifft] (mixer_tx) {$\times$};
+    \node[below=0.6cm of mixer_tx] (lo_tx) {$e^{j\omega_c t}$};
+    \draw[line] (lo_tx) -- (mixer_tx);
+    
+    % Tx Antenna
+    \coordinate[right=0.6cm of mixer_tx] (tx_ant_pos);
+    \draw[thick] (mixer_tx) -- (tx_ant_pos) -- ++(0,0.2);
+    \pic at ([yshift=0.2cm]tx_ant_pos) {antenna};
+
+    % Channel
+    \node[rectangle, draw, thick, rounded corners=2pt, minimum height=1.2cm, text width=2.5cm,
+          fill=gray!10, right=1.2cm of mixer_tx, align=center] (channel) 
+          {Freq. Selective\\Channel $h[l]$};
+
+    % Rx Antenna
+    \coordinate[right=1.2cm of channel] (rx_ant_pos);
+    \pic at ([yshift=0.6cm]rx_ant_pos) {antenna};
+    \draw[thick] ([yshift=0.6cm]rx_ant_pos) -- (rx_ant_pos);
+
+    % CFO
+    \node[adder, right=0.6cm of rx_ant_pos] (cfo_mix) {$\times$};
+    \node[above=0.6cm of cfo_mix, align=center] (cfo_val) {CFO $\bm{\zeta}$\\$e^{j2\pi\zeta n/N}$};
+    \draw[line] (cfo_val) -- (cfo_mix);
+
+    % Noise
+    \node[adder, right=0.6cm of cfo_mix] (add_noise) {$+$};
+    \node[below=0.6cm of add_noise, align=center] (noise_src) {Impulsive\\Noise $\bm{w}[n]$};
+    \draw[line] (noise_src) -- (add_noise);
+
+    % Connections
+    \draw[line] (bits) -- (mod);
+    \draw[line] (mod) -- (ifft);
+    \draw[line] (ifft) -- (mixer_tx);
+    \draw[line, dashed] ([yshift=0.6cm]tx_ant_pos) -- node[above] {} (channel);
+    \draw[line, dashed] (channel) -- ([yshift=0.6cm]rx_ant_pos);
+    \draw[line] (rx_ant_pos) -- node[above, pos=0.5] {$r'$} (cfo_mix);
+    \draw[line] (cfo_mix) -- (add_noise);
+
+    % Proposed Model
+    \node[abstract_block, right=2.0cm of add_noise] (prop_model) {\textbf{Proposed CAD-Huber Model}};
+    \draw[line] (add_noise) -- node[above, font=\bfseries] {$\bm{r}[n]$} (prop_model);
+    \draw[line] (prop_model) -- node[above, font=\large\bfseries, pos=0.8] {$\bm{\hat{\epsilon}}$} ++(2.5,0);
+
+    % --- OUTLINE BOX (Background Layer) ---
+    \begin{pgfonlayer}{background}
+        % 'draw=black' adds the outline, 'fill=white' ensures clarity
+        \node[fit=(current bounding box), draw=black, line width=1.5pt, fill=white, inner sep=15pt, rounded corners=0pt] {}; 
+    \end{pgfonlayer}
+
+\end{tikzpicture}
+}
+\caption{System model illustrating the signal propagation.}
+\label{fig:system_model_highlevel}
+\end{figure*}
+
+\textit{Contributions:} The main contributions of this work are summarized as follows:
+\begin{itemize}
+    \item In this paper, we propose a robust CAD architecture using Huber loss function for CFO estimation for OFDM systems, which provides robustness against heavy-tailed outliers induced by impulsive noise.
+    \item Computer simulations are performed which indicate that the proposed CAD-HuberNet model significantly outperforms the MMSE-based DL models in highly impulsive regimes.
+\end{itemize}
+The remainder of this paper is organized as follows: The considered OFDM system model is discussed in Section II while Section III describes the proposed DL architecture. Simulations are presented in Section IV while Section V concludes the paper.
+
+\section{System Model}
+In this section, we describe the considered system model for CFO estimation as given in Fig. 1. 
+
+\subsection{OFDM Signal Model}
+We consider a baseband OFDM system with $N$ subcarriers. First the message bits are modulated using digital modulation scheme like quadrature amplitude modulation (QAM). The transmitted time-domain signal $x[n]$, after performing inverse fast Fourier transform (IFFT) operation and CP insertion, is given as
+
+\begin{equation}
+x[n] = \frac{1}{\sqrt{N}} \sum_{k=0}^{N-1} X[k] e^{j \frac{2\pi k n}{N}}, \quad -N_{cp} \le n < N
+\end{equation}
+\noindent where $X[k]$ denotes the complex data symbol modulated on the $k$-th subcarrier and $N_{cp}\geq L$ is the length of the CP. Next, the signal propagates through a frequency-selective fading channel with impulse response $\mathbf{h}$ with $L$ channel taps. At the receiver, the signal is corrupted by CFO, denoted by $\epsilon$, which arises due to oscillator mismatch or Doppler shifts. The received signal $r[n]$ at the discrete time index $n$ can be expressed as \cite{chaudhari2023_cad}
+\begin{equation}
+r[n] = e^{j\frac{2\pi \epsilon n}{N}} \sum_{l=0}^{L-1} h[l] x[n-l] + w[n],
+\label{eq:rx_signal_cfo}
+\end{equation}
+\noindent where $\epsilon$ denotes the normalized CFO, which modeled as uniformly distributed random variable $\mathbb{U}(-a, a)$  and $w[n]$ represents the additive noise as described in the next subsection.
+
+\subsection{Noise Model}
+Unlike conventional studies that assume additive white Gaussian noise (AWGN), this work considers a non-Gaussian/impulsive noise environment, which is prevalent in industrial and urban wireless channels. We model the noise $w[n]$ using the symmetric $\alpha$-Stable ($S\alpha S$) distribution \cite{shao1993signal}. The probability density function (PDF) of an $S\alpha S$ variable does not exist in closed form for general $\alpha$, but it is defined by its characteristic function given as follows
+\begin{equation}
+\varphi(t) = \exp\left(-\gamma |t|^\alpha\right),
+\label{eq:sas_char}
+\end{equation}
+where $\alpha \in (0, 2]$ is the characteristic exponent which controls the severity of outliers and $\gamma > 0$ is the dispersion parameter. For $\alpha < 2$, the distribution exhibits algebraic heavy tails ($P(|X|>x) \sim x^{-\alpha}$), implying infinite variance and it reduces to the Gaussian distribution for $\alpha = 2$. This infinite variance property poses a fundamental challenge to conventional estimators based on $L_2$-norm minimization, as the presence of high-amplitude outliers causes the loss function to diverge.
+
+% =================== CAD ARCHITECTURE FIGURE ===================
+% \begin{document}
+
+
+
+
+% ==================================================================
+% FIGURE 2: Detail Architecture with Rectangular Outline
+% ==================================================================
+\begin{figure*}[!t]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[
+    font=\small\sffamily,
+    >=stealth,
+    node distance=0.9cm and 0.9cm,
+    % --- Styles ---
+    line/.style={draw, ->, shorten >=1pt, very thick},
+    connect_line/.style={
+        draw, ->, shorten >=1pt, line width=1.5pt,
+        rounded corners=10pt, color=black!70
+    },
+    sys_block/.style={rectangle, draw=black, fill=cyan!10,
+        text width=1.8cm, minimum height=1.2cm, align=center, rounded corners=2pt,
+        line width=0.8pt},
+    proc_block/.style={rectangle, draw=black, fill=green!10,
+        minimum height=1.0cm, align=center, rounded corners=2pt, drop shadow,
+        line width=0.8pt},
+    att_block/.style={rectangle, draw=black, fill=orange!10,
+        minimum height=1.0cm, align=center, rounded corners=2pt, drop shadow,
+        line width=0.8pt},
+    end_block/.style={rectangle, draw=black, fill=gray!20,
+        minimum height=0.8cm, align=center, rounded corners=2pt,
+        line width=0.8pt},
+    dim_label/.style={font=\scriptsize, color=black!80, align=center},
+    var_label/.style={font=\scriptsize\bfseries, color=black, align=center}
+]
+    % --- Layer Setup ---
+    \pgfdeclarelayer{background}
+    \pgfsetlayers{background,main}
+
+    \coordinate (input_rn) at (-2.2,0);
+
+    % Feature Extraction
+    \node[sys_block] (fe) at (0,0) {\textbf{Feature}\\Extraction\\$\bm{X}^{(u)}, \bm{X}^{(l)}$};
+
+    % Top Branch
+    \node[proc_block] (conv_u) at (3.6,0.9) {\textbf{Conv}\\$(\bm{\psi}^{(u)}, \bm{b}^{(u)})$};
+    \node[proc_block, right=1.6cm of conv_u] (trs_u) {\textbf{TRS}\\$\bm{Y}^{(u)}$};
+    \node[proc_block, right=1.6cm of trs_u] (res_u) {\textbf{Reshape}};
+    \node[att_block, right=1.6cm of res_u] (att_u) {\textbf{Attention}\\$(\bm{w}_{att}^{(u)}, \bm{b}_{att}^{(u)})$};
+
+    % Bottom Branch
+    \node[proc_block] (conv_l) at (3.6,-0.9) {\textbf{Conv}\\$(\bm{\psi}^{(l)}, \bm{b}^{(l)})$};
+    \node[proc_block, right=1.6cm of conv_l] (trs_l) {\textbf{TRS}\\$\bm{Y}^{(l)}$};
+    \node[proc_block, right=1.6cm of trs_l] (res_l) {\textbf{Reshape}};
+    \node[att_block, right=1.6cm of res_l] (att_l) {\textbf{Attention}\\$(\bm{w}_{att}^{(l)}, \bm{b}_{att}^{(l)})$};
+
+    % Merge & Output
+    \path (att_u.east) -- (att_l.east) coordinate[midway] (mid_point_out);
+    \node[end_block, right=2.8cm of mid_point_out] (concat) {\textbf{Concat}};
+    \node[end_block, right=1.0cm of concat] (fc) {\rotatebox{90}{\textbf{FC} {\scriptsize $(\bm{W}_{FC}^m, \bm{b}_{FC}^m)$}}};
+
+    % Connections
+    \draw[line] (input_rn) -- node[above, font=\bfseries] {$\bm{r}[n]$} (fe);
+    
+    % FE -> Branches
+    \draw[connect_line] (fe.east) to[out=25, in=180] node[midway, above, var_label, xshift=0.1cm] {$\bm{X}^{(u)}$} node[midway, below, dim_label, yshift=0cm] {$(S \times 1)$} (conv_u.west);
+    \draw[connect_line] (fe.east) to[out=-25, in=180] node[midway, below, var_label, yshift=-0.1cm] {$\bm{X}^{(l)}$} node[midway, above, dim_label, yshift=0cm] {$(S \times 2)$} (conv_l.west);
+
+    % Top Internal
+    \draw[line] (conv_u) -- node[below, dim_label, yshift=-0.1cm] {$(S \times F)$} node[above, var_label] {$\bm{Y}^{(u)}$} (trs_u);
+    \draw[line] (trs_u) -- node[below, dim_label, yshift=-0.1cm] {$(S \times F)$} node[above, var_label] {$\bm{\tilde{Y}}^{(u)}$} (res_u);
+    \draw[line] (res_u) -- node[below, dim_label, yshift=-0.1cm] {$(F \times S)$} node[above, var_label] {$(\bm{\tilde{Y}}^{(u)})^T$} (att_u);
+
+    % Bottom Internal
+    \draw[line] (conv_l) -- node[below, dim_label, yshift=-0.1cm] {$(S \times F)$} node[above, var_label] {$\bm{Y}^{(l)}$} (trs_l);
+    \draw[line] (trs_l) -- node[below, dim_label, yshift=-0.1cm] {$(S \times F)$} node[above, var_label] {$\bm{\tilde{Y}}^{(l)}$} (res_l);
+    \draw[line] (res_l) -- node[below, dim_label, yshift=-0.1cm] {$(F \times S)$} node[above, var_label] {$(\bm{\tilde{Y}}^{(l)})^T$} (att_l);
+
+    % Output Lines
+    \draw[line] (att_u.east) to[out=0, in=160] node[above, var_label, pos=0.4] {$\bm{z}_{att}^{(u)}$} (concat.west);
+    \draw[line] (att_l.east) to[out=0, in=200] node[above, var_label, pos=0.4] {$\bm{z}_{att}^{(l)}$} (concat.west);
+    \draw[line] (concat) -- node[below, dim_label] {$(2S \times 1)$} node[above, var_label] {$\bm{z}_{att}$} (fc);
+    \draw[line] (fc) -- node[above, font=\large\bfseries] {$\bm{\hat{\epsilon}}$} ++(1.2,0);
+
+    % --- OUTLINE BOX (Background Layer) ---
+    \begin{pgfonlayer}{background}
+        % 'draw=black' adds the outline
+        \node[fit=(current bounding box), draw=black, line width=1.5pt, fill=white, inner sep=15pt, rounded corners=0pt] {}; 
+    \end{pgfonlayer}
+
+\end{tikzpicture}
+}
+\caption{Detailed architecture of the proposed dual-stream CAD-Huber model.}
+\label{fig:cad_hubernet_detail}
+\end{figure*}
+\section{Proposed CFO Estimator}
+In this section, first we describe the considered input feature representation followed by the proposed DL architecture for CFO estimation  in the next subsection. 
+
+\subsection{Input Feature Representation}
+Raw time-domain signals often lack the direct spectral features necessary for efficient frequency offset estimation. To address this, we construct a multi-modal input set $\mathbf{X} = [\mathbf{X}^{(u)}, \mathbf{X}^{(l)}]$ to capture complementary spectral information from the received signal $r[n]$ \cite{chaudhari2023_cad}, where $\mathbf{X}^{(u)}$ and $\mathbf{X}^{(l)}$ are the lower and upper streams, respectively as shown in Fig. 2, which is given as an input to the proposed CAD-HuberNet architecture. First, we compute the magnitude of the discrete Fourier transform (DFT) of the squared received signal, denoted as $\mathbf{X}^{(u)}$ (upper stream):
+\begin{equation}
+\mathbf{X}^{(u)} = \left| \mathcal{F}\left(|r[n]|^2\right) \right| \in \mathbb{R}^{S \times 1},
+\end{equation}
+where $S=N+N_{\text{\tiny{cp}}}$ is OFDM symbol length and $\mathcal{F}(\cdot)$ denotes the Fourier operator. Squaring the signal is a nonlinear operation that amplifies the cyclic frequency components associated with the carrier offset, making them more distinguishable from background noise. Second, we utilize the magnitude and phase of the raw signal's DFT, denoted as $\mathbf{X}^{(l)}$ (lower stream):
+\begin{equation}
+\mathbf{X}^{(l)} = \left[ \left| \mathcal{F}(r[n]) \right|, \angle \mathcal{F}(r[n]) \right] \in \mathbb{R}^{S \times 2}.
+\end{equation}
+This stream preserves the original phase information, which is critical for resolving ambiguities in frequency estimation.
+
+\subsection{Proposed Neural Network Architecture}
+In this subsection, we present the proposed neural network architecture called CAD-HuberNet for estimation of CFO in OFDM systems impaired by impulsive noise. Unlike conventional MMSE-based estimators, which are highly sensitive to outliers, the proposed framework incorporates a dual-stream residual CNN architecture augmented with an attention mechanism and fully connected DNN layers. Furthermore, the entire network is trained using the robust Huber loss function as discussed in details in the next subsection, thereby enhancing stability and estimation accuracy in the presence of non-Gaussian and impulsive noise environments. The CAD-HuberNet architecture processes these inputs through three distinct stages: feature extraction using CNN, attention mechanism, and regression using DNN \cite{chaudhari2023_cad}. 
+
+First, each input stream ($\mathbf{X}^{(u)}$ and $\mathbf{X}^{(l)}$) is processed by a dedicated branch of 1D CNNs as shown in Fig. 2. To facilitate deeper networks without having a gradient vanishing problem, we employ triple residual stacks (TRS) \cite{he2016deep}. For the $l$-th layer in a block, the output $\mathbf{Z}_{l}$ is given by:
+\begin{equation}
+\mathbf{Z}_{l} = \sigma\left(\mathbf{W}_l * \mathbf{Z}_{l-1} + \mathbf{b}_l\right) + \mathbf{Z}_{l-1},
+\end{equation}
+where $*$ denotes the convolution operation, $\mathbf{W}_l$ and $\mathbf{b}_l$ are the learnable weights and biases, and $\sigma(\cdot)$ is the scaled exponential linear unit (SeLU) activation function.
+
+IN typically corrupts specific subcarriers while leaving others intact. To prioritize reliable spectral features, ouput of the TRS block is given as an input to the attention layer \cite{bahdanau2014neural}. For a feature sequence $\mathbf{H} = \{h_1, \dots, h_T\}$ output from the ResBlocks, the attention weights $\alpha_i$ are computed as:
+\begin{equation}
+e_i = \mathbf{v}^T \tanh(\mathbf{W}_a h_i + \mathbf{b}_a), \quad \alpha_i = \frac{\exp(e_i)}{\sum_{k=1}^{T} \exp(e_k)},
+\end{equation}
+where $\mathbf{W}_a$ is the weight matrix, and $\mathbf{b}_a$ is the bias vector of the attention mechanism.The context vector $\mathbf{c} = \sum_{i=1}^{T} \alpha_i h_i$ aggregates the weighted features, effectively suppressing impulsive outliers.
+
+Lastly, the context vectors from both streams are concatenated and fed into a DNN composed of four fully connected layers (with 1024, 560, 512, and 16 neurons, respectively obtained from Adam optimizer). The final layer outputs a scalar $\hat{\epsilon}$, representing the estimated normalized CFO. The SeLU is activation function is used at each of the hidden layer.
+
+\subsection{Robust Optimization via Huber Loss}
+The choice of loss function is critical for handling non-Gaussian noise. Standard MSE loss, equivalent to Maximum Likelihood Estimation (MLE) for Gaussian noise, fails under impulsive conditions (Symmetric $\alpha$-Stable noise with $\alpha < 2$). Heavy-tailed noise produces large residuals ($e_i = \epsilon_i - \hat{\epsilon}_i$), where squaring leads to exploding gradients and unstable convergence. To mitigate this, we employ the Huber loss function, $\mathcal{L}_{\delta}$, which acts as a hybrid of the $L_2$ and $L_1$ norms \cite{huber1964robust}. It provides the precision of MSE for small errors while behaving like the Mean Absolute Error (MAE) for large outliers, ensuring robustness. The loss for a mini-batch of size $N_b$ is defined as:
+
+\begin{equation}
+\min_{\Theta} \mathcal{J}_{\delta} = \min_{\Theta} \frac{1}{N_b} \sum_{i=1}^{N_b} \rho_{\delta}(\epsilon_i - f_{\Theta}(\mathbf{X}_i)),
+\end{equation}
+
+\noindent where $\Theta$ represents the network parameters, and the Huber penalty function $\rho_{\delta}(\cdot)$ is defined as:
+
+\begin{equation}
+\rho_{\delta}(e) = \begin{cases} 
+\frac{1}{2} e^2 & \text{for } |e| \le \delta, \\
+\delta |e| - \frac{1}{2}\delta^2 & \text{for } |e| > \delta.
+\end{cases}
+\label{eq:huber_loss}
+\end{equation}
+
+\noindent The gradient of this loss function, $\psi(e) = \frac{\partial \rho_{\delta}(e)}{\partial e}$ in (9) can be written as follow
+
+\begin{equation}
+\psi(e) = \begin{cases} 
+e & \text{for } |e| \le \delta, \\
+\delta \cdot \text{sgn}(e) & \text{for } |e| > \delta.
+\end{cases}
+\label{eq:huber_grad}
+\end{equation}
+
+When the residual error $|e|$ exceeds the tunable threshold $\delta$, the gradient is clipped to $\pm \delta$. This saturation prevents the massive outliers characteristic of impulsive noise from dominating the backpropagation update, ensuring stable convergence to the true signal structure. The training procedure is summarized in Algorithm 1, utilizing the Adam optimizer \cite{kingma2014adam}.
+
+\begin{algorithm}
+\caption{ Proposed CAD-HuberNet Architecture}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Training dataset $\mathcal{D} = \{(\mathbf{X}_i, \epsilon_i)\}_{i=1}^{N_{tr}}$
+\State \textbf{Initialize:} 
+\State \quad Network parameters $\Theta = \{\mathbf{W}, \mathbf{W}^{att}, \mathbf{b}, \mathbf{b}^{att}, \Psi\}$
+\State \quad Huber threshold $\delta$, Learning rate $\eta$, Batch size $N_b$
+
+\State \quad Optimizer (Adam) parameters $\beta_1, \beta_2$
+\For{$\text{epoch} = 1$ to $E$}
+    \State Shuffle dataset $\mathcal{D}$ and divide into $M$ mini-batches
+    \For{$j = 1$ to $M$}
+        \State Select mini-batch $\mathcal{B}_j \subset \mathcal{D}$
+        \State \textbf{Forward Pass:}
+        \State Compute estimated CFO: $\hat{\epsilon}_k = f_{\Theta}(\mathbf{X}_k)$ $\forall$ $k \in \mathcal{B}_j$
+        \State Compute residuals: $e_k = \epsilon_k - \hat{\epsilon}_k$
+        \State \textbf{Loss Computation:}
+        \State Compute Huber Loss via (9): ${\footnotesize{\mathcal{J}_{\delta} = \frac{1}{N_b} \sum_{\underset{k \in \mathcal{B}_j}{}} \rho_{\delta}(e_k)}}$
+        \State \textbf{Backward Pass:}
+        \State Compute gradients: $\nabla_{\Theta} \mathcal{J}_{\delta}$ using backpropagation
+        \State Update parameters: $\Theta \leftarrow \text{Adam}_{\beta_1, \beta_2}(\Theta, \nabla_{\Theta} \mathcal{J}_{\delta}, \eta)$
+    \EndFor
+    \State Evaluate validation MSE
+    \If{validation MSE does not improve for $N_p$ epochs}
+        \State Stop training (Early Stopping)
+    \EndIf
+\EndFor
+\State \textbf{Output:} Trained model parameters $\Theta^*$ and estimated CFO $\hat{\epsilon}$
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+% \begin{figure}[!t]
+%   \centering
+%   \subfloat[Training convergence (MSE vs Epoch)]{%
+%     \includegraphics[width=2.45in,height=2.42in]{mse_vs_epoch}\hspace{-1em}%
+%     \label{fig:mse_epoch}%
+%   }\hfill
+%   \subfloat[MSE vs. SNR]{%
+%     \includegraphics[width=2.45in,height=2.42in]{steady_mse_vs_snr}\hspace{-1em}%
+%     \label{fig:mse_snr}%
+%   }\hfill
+%   \subfloat[MSE vs. $\alpha$]{%
+%     \includegraphics[width=2.45in,height=2.42in]{mse_vs_alpha}\hspace{-1em}%
+%     \label{fig:mse_alpha}%
+%   }
+%   \caption{Performance comparison of the proposed CAD-HuberNet model against the conventional MMSE-based baseline.}
+%   \label{fig:results_combined}
+% \end{figure}
+% ======================================
+\section{Simulations}
+
+In this section, we evaluate the performance of the proposed CAD-HuberNet architecture for the CFO estimation problem and compare it with the existing baseline, the CAD-MMSE model, as well as classical estimation techniques.
+
+\subsection{Simulation Setup}
+For our simulations, we consider a baseband OFDM system with $N=128$ subcarriers and a CP of length $N_{cp}=16$. The modulation scheme employed is 64-QAM. The wireless channel is modeled as a frequency-selective fading channel with $L=3$ taps. The normalized CFO $\epsilon$ is assumed to be quasi-stationary and is uniformly sampled from the range $[-0.5, 0.5)$. To rigorously test the robustness of the proposed model against non-Gaussian interference, the transmitted signals are corrupted by additive Symmetric $\alpha$-Stable ($S\alpha S$) noise. The characteristic exponent controls the impulsiveness of the noise, and hence $\alpha = 1.4$ is chosen for heavy tails while the dispersion parameter $\gamma = 0.1$ is chosen as in \cite{9794606}. We generated a synthetic dataset comprising $20,000$ OFDM symbols. The dataset was split into training ($70\%$) and validation ($30\%$) sets. The CAD-HuberNet model was implemented using TensorFlow/Keras. Training was performed using the Adam optimizer with an initial learning rate of $10^{-3}$, which was adaptively reduced using a learning rate scheduler. The batch size was set to $1000$, and training was conducted for $2000$ epochs with early stopping to prevent overfitting. 
+
+\subsection{Performance Analysis}
+MSE is considered as the performance evaluation metric. The training convergence performance, i.e., the evolution of MSE with the number of epochs is shown in Fig. \ref{fig:mse_epoch} for the proposed CAD-HuberNet algorithm and the existing MMSE-based CAD approach \cite{chaudhari2023_cad}. It is observed from Fig. \ref{fig:mse_epoch} that the proposed CAD-HuberNet model exhibits a smoother and faster convergence trajectory compared to the baseline CAD approach. The MMSE-based training is characterized by oscillations and instability, particularly in the early epochs, due to the exploding gradients caused by high-amplitude noise spikes arising from the $S\alpha S$ distribution. In contrast, the Huber loss acts as a robust regularizer, ensuring stable gradient descent even in the presence of severe impulsive noise, thereby facilitating more reliable model training.
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=3.5in, height=2.9in]{mse_vs_epoch}
+	\caption{Training convergence performance: evolution of MSE with number of epochs for the proposed CAD-HuberNet and existing CAD approach.} \label{fig:mse_epoch}
+\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=3.5in, height=3.2in]{steady_mse_vs_snr}
+	\caption{Steady-state MSE vs SNR performance for the proposed CAD-HuberNet and existing CAD approach.} \label{fig:mse_snr}
+\end{figure}
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=3.5in, height=3.2in]{mse_vs_alpha}
+	\caption{Steady-state MSE vs $\alpha$ performance comparison for the proposed CAD-HuberNet model against the conventional MMSE-based CAD baseline.} \label{fig:mse_alpha}
+\end{figure}
+
+Next, we evaluate the steady-state MSE performance of the proposed CAD-HuberNet model versus SNR, as illustrated in Fig. \ref{fig:mse_snr}. For this experiment, $\alpha = 1.4$ and $\gamma = 0.1$ is chosen. All MSE values reported below are in the dB scale ($10\log_{10}(\text{MSE})$). It is observed that the proposed CAD-HuberNet architecture consistently outperforms the CAD-MMSE baseline across the entire SNR range from $0$ dB to $30$ dB. Specifically, at a low SNR of $15$ dB, the CAD-HuberNet model achieves an MSE of approximately $-19.21$ dB, providing a significant gain over the CAD-MMSE model, which yields an MSE of $-9.42$ dB. As the SNR increases to $25$ dB, the CAD-HuberNet model continues to demonstrate superior accuracy, reaching an MSE of $-25.32$ dB compared to $-17.69$ dB for the baseline. This performance gain is attributed to the robust nature of the Huber loss function, which effectively mitigates the influence of large outlier errors during the backpropagation process, unlike the $L_2$-norm based MMSE loss which is highly sensitive to such anomalies.
+
+To further validate the generalization capability of the proposed framework, we analyzed the estimation accuracy as a function of the noise characteristic exponent $\alpha$ at a fixed SNR of $20$ dB, with results plotted in Fig. \ref{fig:mse_alpha}. In the highly impulsive regime ($\alpha=1.3$), the CAD-HuberNet model demonstrates remarkable robustness, achieving an MSE of $\approx -1.38$ dB, which represents a substantial improvement over the CAD-MMSE model (MSE $\approx 0$ dB) that struggles to filter out heavy-tailed noise components. As $\alpha$ approaches the Gaussian limit of $2.0$, the performance gap between the two models narrows; at $\alpha=2.0$, the CAD-HuberNet model achieves an MSE of $-20.50$ dB, comparable to the MMSE model's performance. This confirms that the proposed CAD-HuberNet architecture provides a robust solution for practical deployments for CFO estimation against non-Gaussian noise whilst maintaining near-optimal performance in standard Gaussian channels.
+
+\section{Conclusion}
+This paper presented a robust deep learning framework for blind CFO estimation in OFDM systems under non-Gaussian impulsive noise. By combining a CNN-Attention-DNN (CAD) architecture with a Huber loss function, the proposed approach overcomes the limitations of conventional MMSE-based estimators in heavy-tailed noise environments. Simulation results show that the CAD-HuberNet model achieves lower estimation error and improved convergence compared to standard DL methods for $\alpha < 2$. These results demonstrate the robustness and practicality of the proposed method for OFDM-based wireless systems impaired by impulsive noise.
+
+\section*{Acknowledgment}
+This work was supported by the Atal Bihari Vajpayee Indian Institute of Information Technology and Management, Gwalior under faculty initiation grant (Grant Number ABV-IIITM/DORC/FIG/005/2023-4001).
+
+
+\balance
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography} 
+
+\end{document}
